@@ -191,3 +191,11 @@ class Rational():
 
     def parts(self):
         return (self.whole_part, self.remainder, self.den)
+
+    @property
+    def invm(self):
+        return 1/self
+
+    @property
+    def inva(self):
+        return -self
