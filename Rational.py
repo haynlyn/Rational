@@ -15,28 +15,18 @@ class Rational():
             self.den = num.den * den.num
         elif isinstance(num, Rational):
             #print('Rat/int')
-            self = num/den
+            self.num, self.den = num.num, num.den * den
         elif isinstance(den, Rational):
             #print('int/Rat')
-            self = num/den
+            self.num, self.den = num * den.den, den.num
         else:
             raise ValueError("numerator and denominator need to be integers or Rationals")
-
-    """def __gcd_nd(self):
-        g = 1
-        n, d = self.num, self.den
-        if n==d:
-            return n
-        sqn, sqd = n**.5, d**.5
-        for i in range(2, int(min(sqn, sqd))+1):
-            if n%i == 0 and d%i == 0 and i > g:
-                g = i
-                jn, jd = n//i, d//i
-                if d%jn == 0 and jn > g:
-                    g = jn
-                if n%jd == 0 and jd > g:
-                    g = jd
-        return g"""
+        if self.den < 0:
+            self.num *= -1
+            self.den *= -1
+        self.whole_part = self.num // self.den
+        self.remainder = self.num % self.den
+        self.fractional_part = Rational(self.num % self.den, self.den) if self.num >= self.den else self
 
     def __mul__(self, other):
         #print("self: {}\tother: {}".format(self, other))
@@ -46,6 +36,27 @@ class Rational():
             return self.__mul__(Rational(other, 1))
         else:
             return NotImplemented
+
+    def __pow__(self, p):
+        # Integer exponentiation
+        if p == 0:
+            return Rational(1, 1)
+        elif p > 0:
+            if p == 1:
+                return self
+            elif p==2:
+                return self * self
+            elif p%2==0:
+                i = p//2
+                t = self.__pow__(i)
+                return t*t
+            else:
+                i = (p-1)//2
+                t = self.__pow__(i)
+                return self * t * t
+        else:
+            t = 1/self
+            return t.__pow__(-p)
 
     def __rmul__(self, other):
         #print("self: {}\tother: {}".format(self, other))
@@ -115,37 +126,68 @@ class Rational():
     def __repr__(self):
         return "{}/{}".format(self.num, self.den)
 
+    # Comparison operators: BEGIN
+
     def __eq__(self, other):
         if isinstance(other, Rational):
-            sself = self.simplify()
-            sother = other.simplify()
-            return sself.num * sother.den == sself.den * sother.num
+            return (self - other).simplified.num == 0
         elif isinstance(other, int):
             return self.__eq__(Rational(other, 1))
         else:
             return NotImplemented
 
-    def simplify(self):
+    def __lt__(self, other):
+        if isinstance(other, Rational):
+            t = (self - other).simplified
+            return t.num < 0
+        elif isinstance(other, int):
+            return self.__lt__(Rational(other, 1))
+        else:
+            return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Rational):
+            t = (self - other).simplified
+            return t.num > 0
+        elif isinstance(other, int):
+            return self.__gt__(Rational(other, 1))
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __le__(self, other):
+        return (self < other) or (self == other)
+
+    def __ge__(self, other):
+        return (self > other) or (self == other)
+
+    # Comparison operators: END
+
+    @property
+    def simplified(self):
         g = gcd(self.num, self.den)
         #g = self.__gcd_nd()
         return Rational(self.num//g, self.den//g)
 
     def is_simplified(self):
         # check if self is already expressed as simplified-self
-        pass
+        sp = (self.num, self.den)
+        ss = self.simplified
+        ssp = (ss.num, ss.den)
+        return sp == ssp
 
+    '''
     def remainder(self):
-        # return num % den
-        pass
+        return self.num % self.den
 
     def fractional_part(self):
-        # same as remainder()
-        pass
+        return self.num % self.den
 
     def whole_part(self):
-        # return num//den
-        pass
+        return self.num // self.den
+    '''
 
     def parts(self):
-        #return some representation of (whole_part(), fractional_part())
-        pass
+        return (self.whole_part, self.remainder, self.den)
