@@ -1,4 +1,4 @@
-from Rational import Rational
+from Rational.rational import Rational
 
 class Ratrix():
     def __init__(self, elems):
@@ -8,13 +8,35 @@ class Ratrix():
         else:
             for i in range(len(elems)):
                 if isinstance(elems[i], Rational):
-                    elems[i] = elems[i].simplify()
+                    elems[i] = elems[i].simplified
             self.elems = elems
             self.e00, self.e01, self.e10, self.e11 = elems
     
     def __rej__(self, other):
         if not isinstance(other, Ratrix):
             print("Error")
+            return None
+
+    def __pow__(self, p):
+        # Integer exponentiation
+        if p == 0:
+            return Ratrix([1, 0, 0, 1])
+        elif p > 0:
+            if p == 1:
+                return self
+            elif p == 2:
+                return self@self
+            elif p%2 == 0:
+                i = p//2
+                t = self.__pow__(i)
+                return t@t
+            else:
+                i = (p-1)//2
+                t = self.__pow__(i)
+                t = t@t
+                return self@t
+        else:
+            print("Need to find inverse, if possible.")
             return None
     
     def __rrej__(self, other):
@@ -59,5 +81,5 @@ class Ratrix():
             print("Cannot simplify. Returning self.")
             return self
         else:
-            ne = [e.simplify() for e in self.elems]
+            ne = [e.simplified for e in self.elems]
             return Ratrix(ne)

@@ -9,16 +9,9 @@ class Rational():
             #print("int/int")
             self.num = num
             self.den = den
-        elif isinstance(num, Rational) and isinstance(den, Rational):
-            #print("Rat/Rat")
-            self.num = num.num * den.den
-            self.den = num.den * den.num
-        elif isinstance(num, Rational):
-            #print('Rat/int')
-            self.num, self.den = num.num, num.den * den
-        elif isinstance(den, Rational):
-            #print('int/Rat')
-            self.num, self.den = num * den.den, den.num
+        elif isinstance(num, Rational) or isinstance(den, Rational):
+            rat = num/den
+            self.num, self.den = rat.num, rat.den
         else:
             raise ValueError("numerator and denominator need to be integers or Rationals")
         if self.den < 0:
@@ -27,6 +20,7 @@ class Rational():
         self.whole_part = self.num // self.den
         self.remainder = self.num % self.den
         self.fractional_part = Rational(self.num % self.den, self.den) if self.num >= self.den else self
+        self.as_float = self.num / self.den
 
     def __mul__(self, other):
         #print("self: {}\tother: {}".format(self, other))
